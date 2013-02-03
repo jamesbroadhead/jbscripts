@@ -1,0 +1,8 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+NEWDIR="$HOME/oldtmp/$(${DIR}/nicedate)"
+
+echo $NEWDIR
+mkdir -p $NEWDIR
+mv ~/tmp/* $NEWDIR 
