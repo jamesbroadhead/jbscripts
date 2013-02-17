@@ -1,0 +1,20 @@
+#!/bin/bash
+
+LOGDIR=$HOME/logs
+
+! [ -d $LOGDIR ] && mkdir -p $LOGDIR
+LOGFILE=${LOGDIR}/xbmc-update.log
+
+for x in xbmc-send xbmc-send.py ; do 
+	if `type -p $x` &> /dev/null; then
+		XBMC_SEND="$x"
+	fi
+done
+if [ a$x = a ] ; then
+	echo `nicedatetime` ": Install xbmc-send and put it in your path!" >> ${LOGFILE}
+	exit 1;
+fi
+
+$x -a "UpdateLibrary(video)" &> /dev/null
+echo `nicedatetime` ": Updated xbmc library" >> ${LOGFILE}
+exit 0

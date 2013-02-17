@@ -1,7 +1,5 @@
 #!/bin/bash
 
-PATH=$PATH:$HOME/doc/scripts
-
 killall -9 xbmc &> /dev/null
 killall -9 xbmc.bin &> /dev/null
 

@@ -1,0 +1,82 @@
+#!/bin/bash
+
+GITREPOS=""
+HGREPOS=""
+SVNREPOS=""
+for c in $CHECKOUTS ; do
+	for g in $GITREPO_DIRS ; do
+		if [ -d "$c/$g" ] ; then
+			GITREPOS="$GITREPOS $c/$g"
+		fi
+	done
+	for h in $HGREPO_DIRS ; do
+		if [ -d "$c/$h" ] ; then
+			HGREPOS="$HGREPOS $c/$h"
+		fi
+	done
+	for s in $SVNREPO_DIRS ; do
+		if [ -d "$c/$s" ] ; then
+			SVNREPOS="$SVNREPOS $c/$s"
+		fi
+	done
+done
+
+GITREPOS="$GITREPOS $GITREPO_PATHS"
+HGREPOS="$HGREPOS $HGREPO_PATHS"
+SVNREPOS="$SVNREPOS $SVNREPO_PATHS"
+
+OP="$1"
+if [ $OP = "pull" ] || [ $OP = "up" ] ; then
+	GITOPS="pull"
+	HGOPS="pull up"
+	SVNOPS="up"
+elif [ $OP = "push" ] ; then
+	OP="push"
+	GITOPS="$OP"
+	HGOPS="$OP"
+	SVNOPS=""
+elif [ $OP = "status" ] || [ $OP = "st" ] ; then
+	OP="status"
+	GITOPS="$OP"
+	HGOPS="$OP"
+	SVNOPS="$OP"
+else
+	echo "Didn't understand command. Try pull, push or status"
+	exit 1
+fi
+
+do_op() {
+    D=$1
+    CMD=$2
+    op=$3
+
+    if [ -d $D  ] ; then
+        cd $D
+        echo "==== $D/ ===="
+        $CMD $op
+    fi
+}
+
+
+
+
+# GIT
+for repo in $GITREPOS ; do
+	for op in $GITOPS ; do
+		do_op $repo "git" $op
+	done
+done
+
+# HG
+for repo in $HGREPOS ; do
+	for op in $HGOPS ; do
+		do_op $repo "hg" $op
+	done
+done
+
+# SVN
+for repo in $SVNREPOS ; do
+	for op in $SVNOPS ; do
+		do_op $repo "svn" $op
+	done
+done
