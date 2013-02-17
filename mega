@@ -3,7 +3,7 @@
 GITREPOS=""
 HGREPOS=""
 SVNREPOS=""
-for c in $CHECKOUTS ; do
+for c in $CHECKOUT_LOCATIONS ; do
 	for g in $GITREPO_DIRS ; do
 		if [ -d "$c/$g" ] ; then
 			GITREPOS="$GITREPOS $c/$g"
@@ -56,9 +56,6 @@ do_op() {
         $CMD $op
     fi
 }
-
-
-
 
 # GIT
 for repo in $GITREPOS ; do
