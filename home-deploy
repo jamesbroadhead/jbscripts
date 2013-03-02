@@ -34,11 +34,15 @@ make_symlink() {
 		#echo "would backup $newpath"	
 		backup_old_content $newpath
 	fi
+	# at this point, there should be no file or symlink at $newpath already
 	
-	# there is no file or symlink at $newname already
-	
-	#echo "would link $newpath"
-	mkdir -p $(dirname $newpath)
+	# If the dir already is symlinked, remove symlink and replace with a dir 
+	# (ideally this would walk all dirs between newpath_dir and $HOME)
+	newpath_dir=$(dirname $newpath)
+	if [ -L "${newpath_dir}" ] ; then 
+		rm ${newpath_dir}
+	fi	
+	mkdir -p ${newpath_dir}
 	ln -s "$dot_path" "$newpath"
 }
 
