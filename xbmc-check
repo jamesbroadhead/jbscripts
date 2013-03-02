@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+import os
+import subprocess
+import sys
+
+from nicedate import nicedate
+
+# note: each sample takes 3 seconds
+samples= 20
+USAGE_CRASHED=99
+USAGE_BAD=220
+
+debug = False
+def debugprint(debug, str):
+	if debug:
+		print str
+
+if len(sys.argv) > 1:
+	debug = True
+	debugprint(debug,'Debug Mode')
+
+def read_usage(line):
+	l_sp = [ i for i in line.split(' ') if not i == '' ]
+	usage = int(l_sp[8])
+	debugprint(debug, "Usage is %s" % (usage,))	
+	return usage
+
+
+def get_usage(iterations):
+	s = subprocess.Popen(['top', '-b', '-n', str(iterations)], \
+		stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0]
+
+	s = s.split('\n')
+
+	return  [ read_usage(line) for line in s if 'xbmc.bin' in line ]
+
+def do_restart():
+	xbmc_restart = '~/checkouts/jamesbroadhead/scripts/xbmc-restart'
+	s = subprocess.Popen(os.path.join(os.path.expanduser(xbmc_restart)))
+
+usage = get_usage(samples)
+mynicedate = nicedate()
+
+if not len(usage) == 0:
+	os.system('echo ' + mynicedate + '"' + str(sum(usage)) + '/' + str(len(usage)) + '== ' + str(sum(usage) / len(usage)) + '" >> ~/logs/xbmc-check.log')	
+
+# if it's not running
+not_running = len(usage) == 0
+av_usage = (sum(usage) / len(usage))
+
+restart = not_running or (av_usage > USAGE_CRASHED)
+
+if restart: 
+	debugprint(debug,'Would restart, but in debug mode')
+	os.system('echo "RESTARTING" >> ~/logs/xbmc-check.log')	
+	if not debug:
+		do_restart()
+else:
+	debugprint(debug,'Didnt need restart')	

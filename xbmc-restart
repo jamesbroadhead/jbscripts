@@ -1,7 +1,7 @@
 #!/bin/bash
 
-killall -9 xbmc &> /dev/null
-killall -9 xbmc.bin &> /dev/null
+killall xbmc &> /dev/null
+killall xbmc.bin &> /dev/null
 
 DATE=`nicedatetime`
 XBMCLOGDIR=$HOME/.xbmc/temp
@@ -10,7 +10,7 @@ LOGDIR=$HOME/logs
 mkdir -p "$LOGDIR"
 mkdir -p "$LOGDIR/xbmc-restarted"
 
-echo `nicedatetime`" Restarted xbmc" >> $LOGDIR/xbmc-restarted.log
+echo $DATE": Restarted xbmc" >> $LOGDIR/xbmc-restarted.log
 
 [ -f $XBMCLOGDIR/xbmc.log ] && mv $XBMCLOGDIR/xbmc.log $LOGDIR/xbmc-restarted/$DATE-xbmc-restarted.log
 [ -f $XBMCLOGDIR/xbmc.old.log ] && mv $XBMCLOGDIR/xbmc.old.log $LOGDIR/xbmc-restarted/$DATE-xbmc-restarted.old.log
