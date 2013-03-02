@@ -1,20 +1,38 @@
 #!/bin/bash
 
-killall xbmc &> /dev/null
-killall xbmc.bin &> /dev/null
+XBMCLOGDIR="$HOME/.xbmc/temp"
 
-DATE=`nicedatetime`
-XBMCLOGDIR=$HOME/.xbmc/temp
-LOGDIR=$HOME/logs
+LOGFILE="$HOME/logs/xbmc-restarted/xbmc-restarted.log"
+LOGDIR="$(dirname "${LOGFILE}")"
+mkdir -p "${LOGDIR}" 
 
-mkdir -p "$LOGDIR"
-mkdir -p "$LOGDIR/xbmc-restarted"
+echo "$(nicedatetime): xbmc-restart called" >> $LOGFILE
 
-echo $DATE": Restarted xbmc" >> $LOGDIR/xbmc-restarted.log
+if ! [ $(pgrep -c xbmc.bin) -eq 0 ] ; then
+	for SIG in INT TERM HUP KILL ; do
+		PID=$(pgrep xbmc.bin)
+		if ! [ x$PID = x ] ; then
+			echo "$(nicedatetime): kill -$SIG $PID" >> $LOGFILE
+			kill -${SIG} ${PID}
+			sleep 5
+		fi
+	done
 
-[ -f $XBMCLOGDIR/xbmc.log ] && mv $XBMCLOGDIR/xbmc.log $LOGDIR/xbmc-restarted/$DATE-xbmc-restarted.log
-[ -f $XBMCLOGDIR/xbmc.old.log ] && mv $XBMCLOGDIR/xbmc.old.log $LOGDIR/xbmc-restarted/$DATE-xbmc-restarted.old.log
+	if ! [ $(pgrep -c xbmc.bin) -eq 0 ] ; then
+		echo "$(nicedatetime): FAILED TO KILL XBMC" >> $LOGFILE
+		exit 1
+	else
+		echo "$(nicedatetime): Killed xbmc" >> $LOGFILE
+	fi
+else
+	echo "$(nicedatetime): xbmc wasn't running" >> $LOGFILE
+fi
 
-sleep 2
+for i in xbmc.log xbmc.old.log ; do 
+	xbmc_log="${XBMCLOGDIR}/${i}"
+	if [ -f "$xbmc_log" ] ; then
+		mv "$xbmc_log" "$LOGDIR/${DATE}-${i}"
+	fi
+done
 
 DISPLAY=:0 xbmc -fs & &> /dev/null 
