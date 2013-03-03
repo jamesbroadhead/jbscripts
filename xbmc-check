@@ -9,7 +9,6 @@ from nicedate import nicedate
 # note: each sample takes 3 seconds
 samples= 20
 USAGE_CRASHED=99
-USAGE_BAD=220
 
 debug = False
 def debugprint(debug, str):
@@ -36,13 +35,12 @@ def get_usage(iterations):
 	return  [ read_usage(line) for line in s if 'xbmc.bin' in line ]
 
 def do_restart():
-	xbmc_restart = '~/checkouts/jamesbroadhead/scripts/xbmc-restart'
-	s = subprocess.Popen(os.path.join(os.path.expanduser(xbmc_restart)))
+	s = subprocess.Popen('xbmc-restart')
 
 usage = get_usage(samples)
-mynicedate = nicedate()
 
 if not len(usage) == 0:
+	mynicedate = nicedate()
 	os.system('echo ' + mynicedate + '"' + str(sum(usage)) + '/' + str(len(usage)) + '== ' + str(sum(usage) / len(usage)) + '" >> ~/logs/xbmc-check.log')	
 
 # if it's not running
