@@ -50,14 +50,11 @@ for OP in $* ; do
         GITOPS="$OP"
         HGOPS="$OP"
         SVNOPS=""
-    elif [ "$OP" = "status" ] || [ "$OP" = "st" ] ; then
-        OP="status"
+    else
+        echo "Passing arg directly to clients..."
         GITOPS="$OP"
         HGOPS="$OP"
         SVNOPS="$OP"
-    else
-        echo "Didn't understand command. Try pull, push or status"
-        exit 1
     fi
 
     # GIT
