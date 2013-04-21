@@ -27,26 +27,6 @@ GITREPOS="$GITREPOS $GITREPO_PATHS"
 HGREPOS="$HGREPOS $HGREPO_PATHS"
 SVNREPOS="$SVNREPOS $SVNREPO_PATHS"
 
-OP="$1"
-if [ $OP = "pull" ] || [ $OP = "up" ] ; then
-	GITOPS="pull"
-	HGOPS="pull up"
-	SVNOPS="up"
-elif [ $OP = "push" ] ; then
-	OP="push"
-	GITOPS="$OP"
-	HGOPS="$OP"
-	SVNOPS=""
-elif [ $OP = "status" ] || [ $OP = "st" ] ; then
-	OP="status"
-	GITOPS="$OP"
-	HGOPS="$OP"
-	SVNOPS="$OP"
-else
-	echo "Didn't understand command. Try pull, push or status"
-	exit 1
-fi
-
 do_op() {
     D=$1
     CMD=$2
@@ -59,23 +39,45 @@ do_op() {
     fi
 }
 
-# GIT
-for repo in $GITREPOS ; do
-	for op in $GITOPS ; do
-		do_op $repo "git" $op
-	done
-done
 
-# HG
-for repo in $HGREPOS ; do
-	for op in $HGOPS ; do
-		do_op $repo "hg" $op
-	done
-done
+for OP in $* ; do
+    if [ "$OP" = "pull" ] || [ "$OP" = "up" ] ; then
+        GITOPS="pull"
+        HGOPS="pull up"
+        SVNOPS="up"
+    elif [ "$OP" = "push" ] ; then
+        OP="push"
+        GITOPS="$OP"
+        HGOPS="$OP"
+        SVNOPS=""
+    elif [ "$OP" = "status" ] || [ "$OP" = "st" ] ; then
+        OP="status"
+        GITOPS="$OP"
+        HGOPS="$OP"
+        SVNOPS="$OP"
+    else
+        echo "Didn't understand command. Try pull, push or status"
+        exit 1
+    fi
 
-# SVN
-for repo in $SVNREPOS ; do
-	for op in $SVNOPS ; do
-		do_op $repo "svn" $op
-	done
+    # GIT
+    for repo in $GITREPOS ; do
+        for op in $GITOPS ; do
+            do_op $repo "git" $op
+        done
+    done
+
+    # HG
+    for repo in $HGREPOS ; do
+        for op in $HGOPS ; do
+            do_op $repo "hg" $op
+        done
+    done
+
+    # SVN
+    for repo in $SVNREPOS ; do
+        for op in $SVNOPS ; do
+            do_op $repo "svn" $op
+        done
+    done
 done
