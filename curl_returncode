@@ -5,7 +5,7 @@ url="$*"
 total=0
 n_bad=0
 while true ; do
-    CODE_URL=$(curl -sL -w "%{http_code} %{url_effective}\\n" "$url" -o /dev/null ;)
+    CODE_URL=$(curl -ksL -w "%{http_code} %{url_effective}\\n" "$url" -o /dev/null ;)
     total=$[${total}+1]
     if [ $(echo ${CODE_URL} | awk {'print $1'}) = "200" ] ; then
         echo -n '.'
