@@ -49,7 +49,7 @@ for OP in $* ; do
         OP="push"
         GITOPS="$OP"
         HGOPS="$OP"
-        SVNOPS=""
+        SVNOPS="ci"
     else
         echo "Passing arg directly to clients..."
         GITOPS="$OP"
