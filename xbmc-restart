@@ -4,35 +4,46 @@ XBMCLOGDIR="$HOME/.xbmc/temp"
 
 LOGFILE="$HOME/logs/xbmc-restarted/xbmc-restarted.log"
 LOGDIR="$(dirname "${LOGFILE}")"
-mkdir -p "${LOGDIR}" 
+mkdir -p "${LOGDIR}"
 
 echo "$(nicedatetime): xbmc-restart called" >> $LOGFILE
 
-if ! [ $(pgrep -c xbmc.bin) -eq 0 ] ; then
-	for SIG in INT TERM HUP KILL ; do
-		PID=$(pgrep xbmc.bin)
-		if ! [ x$PID = x ] ; then
-			echo "$(nicedatetime): kill -$SIG $PID" >> $LOGFILE
-			kill -${SIG} ${PID}
-			sleep 5
-		fi
-	done
+strings=( "/usr/lib64/xbmc/xbmc.bin" "/bin/sh /usr/bin/xbmc" "/usr/bin/python2.7 /usr/share/xbmc/FEH.py" )
 
-	if ! [ $(pgrep -c xbmc.bin) -eq 0 ] ; then
-		echo "$(nicedatetime): FAILED TO KILL XBMC" >> $LOGFILE
-		exit 1
-	else
-		echo "$(nicedatetime): Killed xbmc" >> $LOGFILE
-	fi
+proc_count() {
+    echo $(pgrep -c -f "$*")
+}
+
+xbmc_exists() {
+    for str in "${strings[@]}" ; do
+        if ! [ $(proc_count "$str") -eq 0 ] ; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+for str in "${strings[@]}" ; do
+    for SIG in SIGINT SIGTERM SIGHUP SIGKILL ; do
+        if ! [ $(proc_count ${str}) -eq 0 ] ; then
+            pkill -f "${str}" --signal $SIG
+            sleep 2
+        fi
+    done
+done
+
+if [ $(xbmc_exists) ] ; then
+    echo "$(nicedatetime): FAILED TO KILL XBMC" >> $LOGFILE
+    exit 1
 else
-	echo "$(nicedatetime): xbmc wasn't running" >> $LOGFILE
+    echo "$(nicedatetime): Killed xbmc" >> $LOGFILE
 fi
 
-for i in xbmc.log xbmc.old.log ; do 
+for i in xbmc.log xbmc.old.log ; do
 	xbmc_log="${XBMCLOGDIR}/${i}"
 	if [ -f "$xbmc_log" ] ; then
-		mv "$xbmc_log" "$LOGDIR/${DATE}-${i}"
+        mv "$xbmc_log" "$LOGDIR/$(nicedatetime)-${i}"
 	fi
 done
 
-DISPLAY=:0 xbmc -fs & &> /dev/null 
+DISPLAY=:0 xbmc -fs & &> /dev/null
