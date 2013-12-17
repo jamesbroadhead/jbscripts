@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ARG="$1"
+if [[ "$ARG" == *gerrit* ]] ; then # assume a gerrit checkout command
+    $ARG
+else
+    git checkout "$ARG"
+fi
+
+git cherry-pick HEAD@{1}
