@@ -1,9 +1,1 @@
-#!/bin/bash
-
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-NEWDIR="$HOME/olddownloads/$(${DIR}/nicedate)"
-
-echo $NEWDIR
-mkdir -p $NEWDIR
-mv ~/downloads/* $NEWDIR 
+clearfoo

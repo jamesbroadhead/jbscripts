@@ -1,0 +1,27 @@
+#!/bin/bash
+
+DATE="$(date +%F)"
+SCRIPT="$( basename $BASH_SOURCE )"
+SOURCENAME="${SCRIPT/clear/}"   # assumed that script is named clear<>
+SOURCE="${HOME}/$SOURCENAME"
+
+TARGET="$HOME/old$SOURCENAME/$DATE"
+if [ -d $TARGET ] ; then
+    TARGET=${TARGET}-$RANDOM
+fi
+
+if ! [ -d "${SOURCE}" ] ; then
+    echo "can't find source! did you run clearfoo directly? Make a symlink!"
+    exit 1
+fi
+COUNT=$(ls -1 $SOURCE | wc -l)
+if [ $COUNT -eq 0 ] ; then
+    echo "Dir is empty already :)"
+    exit 2
+fi
+
+mkdir -pv "${TARGET}"
+rsync -a --remove-source-files "${SOURCE}"/ "${TARGET}"
+find "${SOURCE}/" -type d -exec rmdir -p {} \; &> /dev/null
+
+cd "${SOURCE}"
