@@ -24,4 +24,5 @@ mkdir -pv "${TARGET}"
 rsync -a --remove-source-files "${SOURCE}"/ "${TARGET}"
 find "${SOURCE}/" -type d -exec rmdir -p {} \; &> /dev/null
 
+mkdir ${SOURCE}
 cd "${SOURCE}"
