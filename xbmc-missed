@@ -1,0 +1,9 @@
+#!/bin/bash
+
+LOGFILE="$1"
+
+if [ x$LOGFILE = "x" ] ; then
+    LOGFILE="$HOME/.xbmc/temp/xbmc.log"
+fi
+
+grep -i 'no information found' $LOGFILE  | awk {'print $9'}  | sort | uniq
