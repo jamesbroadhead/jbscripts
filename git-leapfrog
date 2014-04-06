@@ -1,10 +1,16 @@
 #!/bin/bash
 
-ARG="$1"
+ARG="$*"
+echo "$ARG"
 if [[ "$ARG" == *gerrit* ]] ; then # assume a gerrit checkout command
+    echo "execcing .... "
     $ARG
 else
     git checkout "$ARG"
 fi
 
+if ! [ $? -eq 0 ] ; then
+    echo "Error"
+    exit 1
+fi
 git cherry-pick HEAD@{1}
