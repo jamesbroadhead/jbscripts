@@ -1,0 +1,32 @@
+#!/bin/bash
+
+SCRIPT="$( basename "${BASH_SOURCE}" )"
+
+DT=$(date +%F-%T)
+LOGDIR=$HOME/logs
+
+! [ -d "$LOGDIR" ] && mkdir -p "$LOGDIR"
+LOGFILE="${LOGDIR}/${SCRIPT}.log"
+
+for x in xbmc-send xbmc-send.py ; do
+	if type -p "$x" &> /dev/null; then
+		XBMC_SEND="$x"
+	fi
+done
+if [ a$XBMC_SEND = a ] ; then
+	echo "${DT}: Install xbmc-send and put it in your path!" >> "${LOGFILE}"
+	exit 1;
+fi
+
+if [ "${SCRIPT}" = "xbmc-clean" ] ; then
+    COMMAND="CleanLibrary(video)"
+elif [ "${SCRIPT}" = "xbmc-update" ] ; then
+    COMMAND="UpdateLibrary(video)"
+else
+    echo "${DT}: Unknown call to xbmc-cmd as $SCRIPT" >> "${LOGFILE}"
+    exit 2;
+fi
+
+$XBMC_SEND -a "${COMMAND}" &>> "${LOGFILE}"
+echo "${DT}: called xbmc-send with ${COMMAND}" >> "${LOGFILE}"
+exit 0
