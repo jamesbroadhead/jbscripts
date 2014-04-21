@@ -1,0 +1,4 @@
+#!/bin/bash
+# http://www.webvivant.com/zipping-epub-files.html
+zip -X book.epub mimetype
+zip -rg book.epub META-INF OEBPS
