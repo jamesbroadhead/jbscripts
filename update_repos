@@ -1,0 +1,45 @@
+#!/bin/bash
+hlp="
+ update_repos - Keep up to date on all your favorite repos
+   Intended to be used in a crontab, generally for large repos that tend to sit on master
+
+ Usage:
+   update_repos DIR1...
+"
+
+
+for dir in "$@" ; do
+    if ! [ -d "${dir}" ] ; then
+        echo "${dir} does not exist"
+        echo
+        echo "${hlp}"
+        exit 1
+    fi
+
+    cd "${dir}"
+
+    for i in * ; do
+        echo "${dir}/${i}"
+
+        if ! [ -d "${i}" ] ; then
+            echo "${i} is not a dir, skipping"
+            continue
+        fi
+
+        pushd "$i" &> /dev/null
+
+        if [ -d .git ] ; then
+            git fetch -q
+            git remote prune origin
+            git pull
+            nice -n 19 git gc --auto
+
+        elif [ -d .svn ] ; then
+            svn up -q
+        fi
+
+        popd &> /dev/null
+
+    done
+
+done

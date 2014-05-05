@@ -9,4 +9,8 @@ git checkout $basebranch
 git fetch
 git remote prune origin
 # remove all local branches merged into master
-git branch --merged $basebranch | grep -v 'master$' | xargs git branch -d
+
+for branch in $(git branch --merged $basebranch | grep -v 'master$') ; do
+    echo "removing $branch"
+    git branch -d $branch
+done
