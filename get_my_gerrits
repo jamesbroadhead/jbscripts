@@ -1,0 +1,146 @@
+#!/usr/bin/env python
+"""
+get_my_gerrits - print a table of reviews I should address, and those I should ask others for
+
+Excludes:
+    - Reviews which do not have a Verified approval (passed tests)
+    - Reviews which already have reviews (excluding +1s)
+    - Reviews with 'wip' in the commit messsage
+
+Sorts reviews:
+    - By patch-set date (oldest first)
+    - By hierarchy -- patches with parents also up for review are sorted lower
+
+"""
+from datetime import datetime
+import os
+import sys
+
+try:
+    from gerrit import reviews as greviews
+    from gerrit import filters as gfilters
+    from tabulate import tabulate
+except ImportError as e:
+    print e
+
+    print 'Failed to import either gerrit or tabulate'
+    print 'try:   pip install gerrit tabulate'
+    sys.exit(1)
+
+def not_wip(review):
+    return None if 'wip' in review['subject'] else review
+
+def passing_tests(review):
+    """
+    approvals = [
+        {u'by': {u'username': u'gerrit', u'name': u'gerrit'},
+         u'type': u'Verified',
+         u'description': u'Verified',
+         u'value': u'1',
+         u'grantedOn': 1403711105}, ... ]
+    """
+    approvals = review['currentPatchSet'].get('approvals', [])
+
+    for a in approvals:
+
+        if ( a['by']['username'] == 'gerrit' and
+             a['type'] == 'Verified' and
+             a['value'] == '1' ):
+            return review
+    return None
+
+def reviewed_already(review):
+    approvals = review['currentPatchSet'].get('approvals', [])
+
+    for a in approvals:
+        if ( a['type'] == 'Code-Review' and
+             a['value'] in [ '-2', '-1', '2' ]): # +1's aren't helpful
+            return review
+    return None
+
+def get_first_parent(review):
+    return review['currentPatchSet']['parents'][0]
+def get_revision(review):
+    return review['currentPatchSet']['revision']
+def get_created_on(review):
+    # the date the latest patchset was created
+    return review['currentPatchSet']['createdOn']
+
+def sort_reviews(reviews):
+    if not reviews:
+        return []
+    current_revisions = set([ get_revision(r) for r in reviews ])
+    # XXX only checking one parent... is this a problem?
+    first_set = [ r for r in reviews
+                  if not get_first_parent(r) in current_revisions ]
+    remainder = [ r for r in reviews
+                  if not r in first_set ]
+    return sorted(first_set, key=get_created_on) + sort_reviews(remainder)
+
+def parse_date(review):
+    dt = datetime.fromtimestamp(int(get_created_on(review)))
+    return dt
+
+def is_mine(review, username):
+    return review if review['currentPatchSet']['uploader']['username'] == username else None
+
+def printable_subject(review):
+    subject = review['subject']
+    if len(subject) > 30:
+        return subject[:27] + '...'
+    return subject
+
+def main(project=None):
+    filters = gfilters.Items()
+    filters.add_items('is', 'open')
+    filters.add_items('limit', 100)
+
+    me = os.getenv('USER')
+    if project is None: # get reviews posted by the current user
+        title = 'You should ask for reviews:'
+        filters.add_items('owner', me)
+    else:
+        title = 'You should review:'
+        filters.add_items('project', project)
+
+    query = greviews.Query('gerrit')
+    query.filter(*filters)
+
+    all_reviews   = [ review for review in query ]
+
+    # no wips
+    reviews = [ r for r in all_reviews
+                    if not_wip(r) and
+                    passing_tests(r) and
+                    not reviewed_already(r) ]
+
+    if project:
+        reviews = [ r for r in reviews if not is_mine(r, me) ]
+
+    reviews = sort_reviews(reviews)
+
+    printable = [ ( printable_subject(r),
+                    r['url'],
+                    parse_date(r).strftime('%F'),
+                    (datetime.now() - parse_date(r)).days )
+                  for r in reviews ]
+
+    print tabulate(printable, [ title, 'URL', 'Reviewable since', 'Days since then'])
+
+if __name__ == '__main__':
+    project_ = os.getenv('GERRIT_PROJECT')
+    if project_ is None:
+        print 'You must set GERRIT_PROJECT. Either call as:'
+        print '  $ GERRIT_PROJECT=foo get_my_gerrits'
+        print 'or add this to ~/.bash_profile:'
+        print '  export GERRIT_PROJECT=foo'
+        sys.exit(1)
+
+    print 'Looking up project: %s.' % (project_,)
+    print
+    main(project=project_)
+    print
+    print '=============================================='
+    print
+    main()
+    print
