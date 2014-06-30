@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+
+import os
+from os.path import abspath, isdir
+import sys
+
+mydir = sys.argv[1]
+if not isdir(mydir):
+    print 'you must pass an existing dir!'
+mydir = abspath(mydir)
+
+path = os.getenv('PATH')
+dirs = [ abspath(d) for d in path.split(':') ]
+
+if mydir in dirs:
+    print 'yes'
+    sys.exit(0)
+print 'no'
+sys.exit(1)
+
