@@ -24,7 +24,7 @@ except ImportError as e:
     print e
 
     print 'Failed to import either gerrit or tabulate'
-    print 'try:   pip install gerrit tabulate'
+    print 'try:   pip install python-gerrit tabulate'
     sys.exit(1)
 
 def not_wip(review):
@@ -67,12 +67,23 @@ def get_created_on(review):
     return review['currentPatchSet']['createdOn']
 
 def sort_reviews(reviews):
+    """
+    #future: priority order:
+    - reviews with a parent up-for-review and not in master
+    - reviews with parents already in master
+    - reviews with a parent in the current iteration (recurse on this)
+
+    #future: exclude & flag for attention:
+    - reviews with a parent not up-for-review or in master
+    - reviews which cannot merge to master
+    """
     if not reviews:
         return []
     current_revisions = set([ get_revision(r) for r in reviews ])
-    # XXX only checking one parent... is this a problem?
+
     first_set = [ r for r in reviews
                   if not get_first_parent(r) in current_revisions ]
+
     remainder = [ r for r in reviews
                   if not r in first_set ]
     return sorted(first_set, key=get_created_on) + sort_reviews(remainder)
