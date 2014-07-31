@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Take a patch on master, branch, checkout & reset master, then checkout the branch
+# (to support the git-review workflow, having started on master)
+
+
+git log -n 2
+git checkout -b $1
+git checkout master
+git reset --hard origin/master
+git checkout $1
