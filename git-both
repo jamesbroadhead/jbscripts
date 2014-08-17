@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# For comparing binary files which have conflicts in git. Checkout and copy 'theirs', then
+# checkout 'ours' for comparison
+#
+
+if ! [ -f $1 ] ; then
+    echo "first arg must be a file that exists"
+fi
+
+git checkout --theirs $1
+cp $1 $1-theirs
+git checkout --ours $1
+
+echo "Created $1-theirs. The current version is 'ours'"
+
