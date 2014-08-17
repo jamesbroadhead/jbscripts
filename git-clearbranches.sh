@@ -7,6 +7,7 @@ else
 fi
 git checkout $basebranch
 git fetch
+echo "pruning remote branches..."
 git remote prune origin
 # remove all local branches merged into master
 
