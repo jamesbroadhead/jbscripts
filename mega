@@ -39,8 +39,13 @@ do_op() {
     fi
 }
 
+if [ z"$*" = z ] ; then
+    OPS="pull push"
+else
+    OPS=""
+fi
 
-for OP in $* ; do
+for OP in $OPS $* ; do
     if [ "$OP" = "pull" ] || [ "$OP" = "up" ] ; then
         GITOPS="pull"
         HGOPS="pull up"
