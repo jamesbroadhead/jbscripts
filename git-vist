@@ -1,0 +1,5 @@
+#!/bin/bash
+
+files=$(git st --porcelain | awk {'print $2'} | tr '\n' ' ')
+
+vim -p $files

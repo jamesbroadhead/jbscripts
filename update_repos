@@ -33,6 +33,7 @@ for dir in "$@" ; do
             git remote prune origin
             git pull
             nice -n 19 git gc --auto
+            nice -n 19 git fsck
 
         elif [ -d .svn ] ; then
             svn up -q
