@@ -28,7 +28,7 @@ except ImportError as e:
     sys.exit(1)
 
 def not_wip(review):
-    return None if 'wip' in review['subject'] else review
+    return None if 'wip' in review['subject'].lower() else review
 
 def passing_tests(review):
     """
