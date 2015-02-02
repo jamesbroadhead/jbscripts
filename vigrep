@@ -1,0 +1,3 @@
+#!/bin/bash
+# http://superuser.com/a/427881
+grep -ril $* | xargs bash -c '</dev/tty vim -p "$@"' ignoreme

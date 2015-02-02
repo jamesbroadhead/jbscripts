@@ -32,6 +32,9 @@ for dir in "$@" ; do
             git fetch -q
             git remote prune origin
             git pull
+            git submodule init
+            git submodule sync
+            git submodule update
             nice -n 19 git gc --auto
             nice -n 19 git fsck
 
