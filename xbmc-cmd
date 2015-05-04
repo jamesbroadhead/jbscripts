@@ -8,13 +8,13 @@ LOGDIR=$HOME/logs
 ! [ -d "$LOGDIR" ] && mkdir -p "$LOGDIR"
 LOGFILE="${LOGDIR}/${SCRIPT}.log"
 
-for x in xbmc-send xbmc-send.py ; do
+for x in xbmc-send xbmc-send.py kodi-send kodi-send.py ; do
 	if type -p "$x" &> /dev/null; then
 		XBMC_SEND="$x"
 	fi
 done
 if [ a$XBMC_SEND = a ] ; then
-	echo "${DT}: Install xbmc-send and put it in your path!" >> "${LOGFILE}"
+	echo "${DT}: Install xbmc-send/kodi-send and put it in your path!" >> "${LOGFILE}"
 	exit 1;
 fi
 
