@@ -2,4 +2,6 @@
 
 files=$(git st --porcelain | awk {'print $2'} | tr '\n' ' ')
 
+cd $(git rev-parse --show-toplevel)
+
 vim -p $files
