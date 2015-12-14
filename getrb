@@ -1,0 +1,3 @@
+#!/bin/bash
+
+curl "https://reviewboard.twitter.biz/r/$1/diff/raw/" > "$HOME/downloads/$1.patch"
