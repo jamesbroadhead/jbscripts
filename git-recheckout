@@ -1,11 +1,13 @@
 #!/bin/bash
 
+set -eu
 BRANCH="git-review/branches/$1"
 
 cd "$(git rev-parse --show-toplevel)"
 
 echo "stashing changes.."
 git st
+git add .
 git stash
 
 git checkout master
@@ -14,9 +16,9 @@ git branch -l | grep -q "${BRANCH}" && git branch -D "${BRANCH}"
 
 getrb "$1"
 git checkout -b "${BRANCH}"
+git review set "$1"
 patch -p1 < "$HOME/downloads/${1}.patch"
 
 FILES=($(git st --porcelain | awk {'print $2'} | grep -v '\.rej$' | grep -v '\.orig$'))
 git add "${FILES[@]}"
 git ci -m "git-recheckout ${1}"
-git review set "$1"
