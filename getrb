@@ -1,3 +1,12 @@
 #!/bin/bash
 
-curl "https://reviewboard.twitter.biz/r/$1/diff/raw/" > "$HOME/downloads/$1.patch"
+curl "https://reviewboard.twitter.biz/r/$1/diff/raw/" > "$HOME/tmp/$1.patch"
+
+RET="$?"
+if [ "$RET" -eq 0 ] ; then
+  mv "$HOME/tmp/$1.patch" "$HOME/downloads/"
+else
+  exit $RET
+fi
+
+

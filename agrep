@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# Use 'ag' with grep-like defaults
+
+ag --nobreak --nonumbers --noheading --nofilename $*
