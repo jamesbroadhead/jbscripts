@@ -1,85 +1,70 @@
-#!/bin/bash
+#!/usr/bin/env python
+"""
 
-# Must set CHECKOUT_LOCATIONS, GITREPO_DIRS, HGREPO_DIRS and SVNREPO_DIRS
+Environment variables:
+  Must set CHECKOUT_LOCATIONS and some of:
+    GITREPO_DIRS, HGREPO_DIRS and SVNREPO_DIRS
+  or:
+    <vcs>REPO_PATHS
 
-GITREPOS=""
-HGREPOS=""
-SVNREPOS=""
-for c in $CHECKOUT_LOCATIONS ; do
-	for g in $GITREPO_DIRS ; do
-		if [ -d "$c/$g" ] ; then
-			GITREPOS="$GITREPOS $c/$g"
-		fi
-	done
-	for h in $HGREPO_DIRS ; do
-		if [ -d "$c/$h" ] ; then
-			HGREPOS="$HGREPOS $c/$h"
-		fi
-	done
-	for s in $SVNREPO_DIRS ; do
-		if [ -d "$c/$s" ] ; then
-			SVNREPOS="$SVNREPOS $c/$s"
-		fi
-	done
-done
+"""
+from __future__ import print_function
 
-GITREPOS="$GITREPOS $GITREPO_PATHS"
-HGREPOS="$HGREPOS $HGREPO_PATHS"
-SVNREPOS="$SVNREPOS $SVNREPO_PATHS"
+import os
+from os.path import abspath, expanduser, isdir, realpath
+from os.path import join as pjoin
+import shlex
+import subprocess
+import sys
 
-do_op() {
-    D=$1
-    CMD=$2
-    op=$3
-
-    if [ -d $D  ] ; then
-        cd $D
-        echo "==== $D/ ===="
-        $CMD $op
-    fi
+vcss = [ 'svn', 'hg', 'git' ]
+translations = {
+  'svn': { 'push': ['ci'], 'pull': ['up']},
+  'hg' : { 'pull': ['pull', 'up'] },
 }
 
-if [ z"$*" = z ] ; then
-    OPS="pull push"
-else
-    OPS=""
-fi
+def get_paths(vcs):
+  """
+  Uses environment variables:
+  <vcs>REPO_DIRS: the names of eligible repos, which may exist inside
+    CHECKOUT_LOCATIONS
+  <vcs>REPO_PATHS: full paths to repos
+  """
+  checkout_locations = os.environ.get('CHECKOUT_LOCATIONS', '').split()
+  vcs_repo_dirs = os.environ.get('{}REPO_DIRS'.format(vcs.upper()), '').split()
+  vcs_repo_paths = os.environ.get('{}REPO_PATHS'.format(vcs.upper()), '').split()
+  potential_paths = [ p for p in vcs_repo_paths if isdir(p) ]
 
-for OP in $OPS $* ; do
-    if [ "$OP" = "pull" ] || [ "$OP" = "up" ] ; then
-        GITOPS="pull"
-        HGOPS="pull up"
-        SVNOPS="up"
-    elif [ "$OP" = "push" ] ; then
-        OP="push"
-        GITOPS="$OP"
-        HGOPS="$OP"
-        SVNOPS="ci"
-    else
-        echo "Passing arg directly to clients..."
-        GITOPS="$OP"
-        HGOPS="$OP"
-        SVNOPS="$OP"
-    fi
+  for c in checkout_locations:
+    joined = [ pjoin(abspath(expanduser(c)), p) for p in vcs_repo_dirs ]
+    potential_paths = potential_paths + [ j for j in joined if isdir(j) ]
+  return sorted(set(realpath(p) for p in potential_paths))
 
-    # GIT
-    for repo in $GITREPOS ; do
-        for op in $GITOPS ; do
-            do_op $repo "git" $op
-        done
-    done
+def translate(vcs, operation):
+  """
+  translate a CLI operation into args for the VCS.
+  Operations:Commands are not always a 1:1 mapping
 
-    # HG
-    for repo in $HGREPOS ; do
-        for op in $HGOPS ; do
-            do_op $repo "hg" $op
-        done
-    done
+  @return list of strings
+  """
+  return translations.get(vcs, {}).get(operation, [operation])
 
-    # SVN
-    for repo in $SVNREPOS ; do
-        for op in $SVNOPS ; do
-            do_op $repo "svn" $op
-        done
-    done
-done
+def vcs_command(vcs, path, operation):
+  commands = translate(vcs, operation)
+  os.chdir(path)
+  for c in commands:
+    print('=== {} ==='.format(path))
+    subprocess.call([vcs] + shlex.split(c))
+
+def main():
+  operations = sys.argv[1:]
+
+  paths = { vcs: get_paths(vcs) for vcs in vcss }
+
+  for vcs in sorted(vcss):
+    for path in paths[vcs]:
+      for operation in operations:
+        vcs_command(vcs, path, operation)
+
+if __name__ == '__main__':
+  main()
