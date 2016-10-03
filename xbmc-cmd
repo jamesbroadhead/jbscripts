@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT="$( basename "${BASH_SOURCE}" )"
+SCRIPT="$( basename "${BASH_SOURCE[0]}" )"
 
 DT=$(date +%F-%T)
 LOGDIR=$HOME/logs
@@ -18,15 +18,15 @@ if [ a$XBMC_SEND = a ] ; then
 	exit 1;
 fi
 
-if [ "${SCRIPT}" = "xbmc-clean" ] ; then
+if [[ "${SCRIPT}" =~ .*-clean$ ]] ; then
     COMMAND="CleanLibrary(video)"
-elif [ "${SCRIPT}" = "xbmc-update" ] ; then
+elif [[ "${SCRIPT}" =~ .*-update$ ]] ; then
     COMMAND="UpdateLibrary(video)"
 else
     echo "${DT}: Unknown call to xbmc-cmd as $SCRIPT" >> "${LOGFILE}"
     exit 2;
 fi
 
+echo "${DT}: calling xbmc-send with ${COMMAND}" >> "${LOGFILE}"
 $XBMC_SEND -a "${COMMAND}" &>> "${LOGFILE}"
-echo "${DT}: called xbmc-send with ${COMMAND}" >> "${LOGFILE}"
-exit 0
+exit $?
