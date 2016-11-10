@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+# mv, but use rsync
+
+set -euo pipefail
+IFS=$'\n\t'
+
+rsync -avP --remove-source-files "$@"
+
+# maybe: interpret the args & ssh+`rmdir -p`
