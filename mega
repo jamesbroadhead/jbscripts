@@ -19,10 +19,13 @@ import sys
 
 vcss = [ 'svn', 'hg', 'git' ]
 translations = {
+  'git': {
+    'st': ['status --porcelain'],
+    'push': ['push --porcelain'],
+  },
   'svn': { 'push': ['ci'], 'pull': ['up']},
   'hg' : { 'pull': ['pull', 'up'] },
 }
-vcs_flags = { 'git': '--porcelain' }
 
 def get_paths(vcs):
   """
@@ -52,12 +55,10 @@ def translate(vcs, operation):
 
 def vcs_command(vcs, path, operation):
   commands = translate(vcs, operation)
-  flags = vcs_flags.get(vcs, '')
   os.chdir(path)
   for cmd in commands:
     print('=== {} ==='.format(path))
-    # flags are after the cmd, as git doesn't like flags first
-    subprocess.call([vcs] + shlex.split(cmd) + [flags])
+    subprocess.call([vcs] + shlex.split(cmd))
 
 def main():
   operations = sys.argv[1:]
