@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# Attempt to rmdir all the contents of $*, then rmdir $1
+# This is instead of `rmdir -p`, which is more strict about the forms
+# of arguments it will take
+
+rmdirr() {
+	for i in $(ls -A $1) ; do
+		if ! [ -d "$1/$i" ] ; then
+			echo "Non-dir found: $1/$i"
+			continue
+		else
+			rmdirr $(readlink -f "$1/$i")
+		fi
+	done
+	rmdir "$1"
+}
+
+IFS=$'\n'
+for i in $* ; do
+	rmdirr "$i"
+done

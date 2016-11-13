@@ -19,6 +19,10 @@ import sys
 
 vcss = [ 'svn', 'hg', 'git' ]
 translations = {
+  'git': {
+    'st': ['status --porcelain'],
+    'push': ['push --porcelain'],
+  },
   'svn': { 'push': ['ci'], 'pull': ['up']},
   'hg' : { 'pull': ['pull', 'up'] },
 }
@@ -52,9 +56,9 @@ def translate(vcs, operation):
 def vcs_command(vcs, path, operation):
   commands = translate(vcs, operation)
   os.chdir(path)
-  for c in commands:
+  for cmd in commands:
     print('=== {} ==='.format(path))
-    subprocess.call([vcs] + shlex.split(c))
+    subprocess.call([vcs] + shlex.split(cmd))
 
 def main():
   operations = sys.argv[1:]
