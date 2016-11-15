@@ -1,3 +1,5 @@
 #!/bin/bash
+#
+# Open all files modified in HEAD
 
 vim -p $(git diff-tree --no-commit-id --name-only -r HEAD)
