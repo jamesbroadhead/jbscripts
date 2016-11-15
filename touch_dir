@@ -1,5 +1,0 @@
-SEEDDIR=$1
-
-for i in * ; do
-	touch ${SEEDDIR}/$i
-done
