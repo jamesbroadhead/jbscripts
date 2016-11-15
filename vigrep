@@ -1,3 +1,10 @@
 #!/bin/bash
+#
+# grep for something, then open matching files in vim
+#
 # http://superuser.com/a/427881
-grep -ril $* | xargs bash -c '</dev/tty vim -p "$@"' ignoreme
+#
+
+. bash_safe_mode
+
+grep -ril "$@" | xargs bash -c '</dev/tty vim -p "$@"' ignoreme

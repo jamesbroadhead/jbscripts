@@ -1,7 +1,9 @@
 #!/bin/bash
 
-files=$(git st --porcelain | grep UU | awk {'print $2'} | tr '\n' ' ')
+. bash_safe_mode
 
-cd $(git rev-parse --show-toplevel)
+files=("$(git st --porcelain | grep UU | awk '{print $2}')")
 
-vim -p $files
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+vim -p "${files[@]}"

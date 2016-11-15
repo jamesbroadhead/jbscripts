@@ -2,4 +2,10 @@
 #
 # Open all files modified in HEAD
 
-vim -p $(git diff-tree --no-commit-id --name-only -r HEAD)
+. bash_safe_mode
+
+files=($(git diff-tree --no-commit-id --name-only -r HEAD))
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+vim -p "${files[@]}"
