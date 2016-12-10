@@ -23,7 +23,9 @@ translations = {
     'st': ['status --porcelain'],
     'push': ['push --porcelain'],
   },
-  'svn': { 'push': ['ci'], 'pull': ['up']},
+  'svn': {
+      'push': ['ci'],
+      'pull': ['up']},
   'hg' : { 'pull': ['pull', 'up'] },
 }
 
