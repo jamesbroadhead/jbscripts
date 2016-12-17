@@ -14,34 +14,34 @@ make_symlink() {
     dot_path="${1}"
 	dot_name="$(basename ${1})"
 	newpath=$(home_form $dot_path)
-   	
-	if [ -L "${newpath}" ] ; then 
+
+	if [ -L "${newpath}" ] ; then
 		# broken symlink in place
-		if ! [ -f "${newpath}" ] && [ -L "${newpath}" ] ; then 
-			#echo "would remove $newpath"	
+		if ! [ -f "${newpath}" ] && [ -L "${newpath}" ] ; then
+			#echo "would remove $newpath"
 			rm "$newpath"
 		# not a symlink pointing to the correct location
 		elif ! [ "$(readlink ${newpath})" = "${dot_path}" ] ; then
 			#echo "would replace $newpath"
 			backup_old_content $newpath
-		# there is a symlink pointing to the correct location already	
+		# there is a symlink pointing to the correct location already
 		else
-			#echo "looks ok $newpath"	
+			#echo "looks ok $newpath"
 			return 0
 		fi
-		
+
 	elif [ -e "${newpath}" ] ; then
-		#echo "would backup $newpath"	
+		#echo "would backup $newpath"
 		backup_old_content $newpath
 	fi
 	# at this point, there should be no file or symlink at $newpath already
-	
-	# If the dir already is symlinked, remove symlink and replace with a dir 
+
+	# If the dir already is symlinked, remove symlink and replace with a dir
 	# (ideally this would walk all dirs between newpath_dir and $HOME)
 	newpath_dir=$(dirname $newpath)
-	if [ -L "${newpath_dir}" ] ; then 
+	if [ -L "${newpath_dir}" ] ; then
 		rm ${newpath_dir}
-	fi	
+	fi
 	mkdir -p ${newpath_dir}
 	ln -s "$dot_path" "$newpath"
 }
