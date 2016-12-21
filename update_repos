@@ -7,6 +7,39 @@ hlp="
    update_repos DIR1...
 "
 
+. bash_safe_mode
+
+do_dir() {
+  subdir="$1"
+  path="$(pwd)/${subdir}"
+  echo "${path}"
+
+  if ! [ -d "${subdir}" ] ; then
+      echo "${subdir} is not a dir, skipping"
+      continue
+  fi
+
+  pushd "${subdir}" &> /dev/null
+
+  if [ -d .git ] ; then
+      git fetch -q
+      git remote prune origin
+      git pull
+      git submodule init
+      git submodule sync
+      git submodule update
+      nice -n 19 git gc --auto
+      nice -n 19 git fsck
+
+  elif [ -d .svn ] ; then
+      svn up -q
+  else
+      # this isn't a repo - but maybe there are repos further down
+      update_repos .
+  fi
+
+  popd &> /dev/null
+}
 
 for dir in "$@" ; do
     if ! [ -d "${dir}" ] ; then
@@ -18,36 +51,10 @@ for dir in "$@" ; do
 
     cd "${dir}"
 
-    for i in * ; do
-        path="${dir}/${i}"
-        echo "${path}"
-
-        if ! [ -d "${i}" ] ; then
-            echo "${i} is not a dir, skipping"
-            continue
-        fi
-
-        pushd "$i" &> /dev/null
-
-        if [ -d .git ] ; then
-            git fetch -q
-            git remote prune origin
-            git pull
-            git submodule init
-            git submodule sync
-            git submodule update
-            nice -n 19 git gc --auto
-            nice -n 19 git fsck
-
-        elif [ -d .svn ] ; then
-            svn up -q
-        else
-            # this isn't a repo - maybe there are repos further down
-            update_repos "${path}"
-        fi
-
-        popd &> /dev/null
-
+    # uses find, not shell expansion. Supports \n in filenames
+    # FAILS on: if the cwd is an empty directory (which happens through recursion)
+    find ./* -type d -print0 | while IFS= read -r -d '' subdir; do
+      do_dir "${subdir}"
     done
 
 done
