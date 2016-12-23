@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SINCE="2015-01-01"
+AUTHOR="$1"
+
+if [ z"${AUTHOR}" = "z" ] ; then
+  echo "Must supply an author as an argument. An email address?"
+  exit 1
+fi
+
+git log --since="$SINCE" --pretty="%H" --author="$AUTHOR" --numstat | awk 'NF==3 {plus+=$1; minus+=$2} END {printf("+%d, -%d\n", plus, minus)}'
