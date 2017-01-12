@@ -1,10 +1,15 @@
 #!/bin/bash
 #
 # mv, but use rsync
+#
+# Does not clean directories afterwards
+# https://bugzilla.samba.org/show_bug.cgi?id=3845
+# TODO (maybe): implement this in this script
+#
+# WARNING: if src == dst, then src will be deleted
+# https://bugzilla.samba.org/show_bug.cgi?id=6307
 
 set -euo pipefail
 IFS=$'\n\t'
 
 rsync -avP --remove-source-files "$@"
-
-# maybe: interpret the args & ssh+`rmdir -p`
