@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# git log for a path or paths, printing the full diff
+
+git log --stat -p -- "$@"
