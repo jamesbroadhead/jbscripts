@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # swap_type FROM TO (eg. swap_type cbr cbz)
 swap_type() {
 	FAILTXT=""
 	BIFS=${IFS}
 	IFS=""
-	
+
 	if [ ${1,,} == cbr ] ; then
 		TESTSTART="unrar l "
 		TESTEND="  | grep -i 'is not'"
@@ -17,14 +17,14 @@ swap_type() {
 		return
 	fi
 
-	for i in *${1,,} *${1^^} ; do 
-		TEST="${TESTSTART} \"${i}\" ${TESTEND}"	
+	for i in *${1,,} *${1^^} ; do
+		TEST="${TESTSTART} \"${i}\" ${TESTEND}"
 		FAILTXT=$(eval ${TEST})
 		# if not zero length, echo, try as zip, mv to cbz
-		if ! [ -z "$FAILTXT" ] ; then 
-			echo "!${1,,}: ${i}" 
+		if ! [ -z "$FAILTXT" ] ; then
+			echo "!${1,,}: ${i}"
 			toname="${i/%$1/${2,,}}"
-			if ! [ -e "${toname}" ] ; then 
+			if ! [ -e "${toname}" ] ; then
 				mv "$i" "${toname}"
 			else
 				echo "${i} is not a ${1,,}, but not overwriting ${toname}"
@@ -33,7 +33,7 @@ swap_type() {
 
 		FAILTXT=""
 	done
-	
+
 	IFS=${BIFS}
 }
 

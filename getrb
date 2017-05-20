@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 curl "https://reviewboard.twitter.biz/r/$1/diff/raw/" > "$HOME/tmp/$1.patch"
 

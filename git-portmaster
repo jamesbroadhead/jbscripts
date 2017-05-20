@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Take a patch on master, branch, checkout & reset master, then checkout the branch
 # (to support the git-review workflow, having started on master)

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 detect_ssh_keys() {
   ssh-agent -l &> /dev/null
