@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Attempt to rmdir all the contents of $*, then rmdir $1
 # This is instead of `rmdir -p`, which is more strict about the forms

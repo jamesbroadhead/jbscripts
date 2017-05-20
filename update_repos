@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 hlp="
  update_repos - Keep up to date on all your favorite repos
    Intended to be used in a crontab, generally for large repos that tend to sit on master
