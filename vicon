@@ -2,8 +2,8 @@
 
 . bash_safe_mode
 
-files=("$(git st --porcelain | grep UU | awk '{print $2}')")
-
 cd "$(git rev-parse --show-toplevel)" || exit 1
+
+files=($(git diff --name-only --diff-filter=UU))
 
 vim -p "${files[@]}"
