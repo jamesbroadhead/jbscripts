@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -eu
+
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+git push --set-upstream origin "${BRANCH}"
+
+# get the remote as a url (even if it's git@foo.com/bar.git)
+REMOTE="$(git remote -v  | grep origin | grep push | awk '{print $2}')"
+if [[ "${REMOTE}" == "git@"* ]] ; then
+  REMOTE="https://$(echo "${REMOTE}" | sed 's|\.git$||' | sed 's|:|/|' | sed 's|^git@||')"
+fi
+[[ "${REMOTE}" == *github.com* ]] && open "${REMOTE}/compare/${BRANCH}?expand=1"
