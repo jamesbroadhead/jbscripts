@@ -1,0 +1,5 @@
+#!/bin/bash
+
+files=("$(git status --porcelain | grep '^??' | sed 's|^??||g')")
+
+rm -rIf $files
