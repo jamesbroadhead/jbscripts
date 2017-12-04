@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 #
-# git log for a path or paths, printing the full diff
+# git log for a single path, printing the full diff history
 
-git log --stat -p -- "$@"
+git log -p --follow $1
