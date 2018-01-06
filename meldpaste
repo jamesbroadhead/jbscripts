@@ -5,18 +5,20 @@
 # If the first arg is a file, that will be used.
 # Otherwise, meld opens with two empty files
 
-mkdir -p "${HOME}/tmp"
+MELDTMP=$(mktemp -d) || { RC=$?; echo "mktemp failed"; exit $RC; }
+echo "MELDTMP='$MELDTMP'"
 
 if [ -f "$1" ] ; then
-  B="$1"
+  A="$1"
 else
-  B="${HOME}/tmp/b"
-  [ -f "$B" ] && rm "$B"
-  touch "$B"
+  A="${MELDTMP}/meldpaste_a"
+  > "$A"
 fi
 
-A="${HOME}/tmp/a"
-[ -f "$A" ] && rm "$A"
-touch "$A"
+B="${MELDTMP}/meldpaste_b"
+> "$B"
 
 meld "$A" "$B"
+
+rm -rf "${MELDTMP}"
+
