@@ -10,4 +10,10 @@ REMOTE="$(git remote -v  | grep origin | grep push | awk '{print $2}')"
 if [[ "${REMOTE}" == "git@"* ]] ; then
   REMOTE="https://$(echo "${REMOTE}" | sed 's|\.git$||' | sed 's|:|/|' | sed 's|^git@||')"
 fi
-[[ "${REMOTE}" == *github.com* ]] && echo "${REMOTE}/compare/${BRANCH}?expand=1" && open "${REMOTE}/compare/${BRANCH}?expand=1"
+
+if [[ "${REMOTE}" == *github.com* ]] ; then
+  URL="${REMOTE}/compare/${BRANCH}?expand=1"
+  echo "${URL}"
+
+  generic_open "${URL}"
+fi

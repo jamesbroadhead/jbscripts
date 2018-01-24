@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 for i in $* ; do
-    open $i &
+    generic_open $i &
 done
