@@ -2,6 +2,12 @@
 
 set -eu
 
+if [ z${1-} = "z" ] ; then
+  COMPARE_BRANCH="master"
+else
+  COMPARE_BRANCH="$1"
+fi
+
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 git push --set-upstream origin "${BRANCH}"
 
@@ -10,6 +16,10 @@ REMOTE="$(git remote -v  | grep origin | grep push | awk '{print $2}')"
 if [[ "${REMOTE}" == "git@"* ]] ; then
   REMOTE="https://$(echo "${REMOTE}" | sed 's|\.git$||' | sed 's|:|/|' | sed 's|^git@||')"
 fi
+
+
+
+
 
 if [[ "${REMOTE}" == *github.com* ]] ; then
   URL="${REMOTE}/compare/${BRANCH}?expand=1"
