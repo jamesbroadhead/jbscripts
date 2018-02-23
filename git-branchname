@@ -1,0 +1,5 @@
+#!/bin/bash
+
+. bash_safe_mode
+
+git rev-parse --abbrev-ref HEAD

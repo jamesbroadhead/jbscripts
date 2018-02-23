@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# Commit to this branch, using a converted branch name as the commit message
+#
+# eg. branch: JIRA-1234_foo_bar becomes "JIRA-1234: foo bar"
+
+
+. bash_safe_mode
+
+branchname="$(git-branchname)";
+commit_msg="$(echo "$branchname" | sed 's|_|: |' | sed 's|_| |g')";
+git ci -m "${commit_msg}"

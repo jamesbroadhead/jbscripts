@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Push the current branch to a matching branch on origin, open a browser on the github
+# diff page if it's to a github upstream
 
 set -eu
 
