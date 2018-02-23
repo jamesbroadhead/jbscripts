@@ -1,0 +1,6 @@
+#!/bin/bash
+
+. bash_safe_mode
+
+git fetch
+git checkout "$@"
