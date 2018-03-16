@@ -18,8 +18,9 @@ git push --set-upstream origin "${BRANCH}"
 REMOTE="$(git remote -v  | grep origin | grep push | awk '{print $2}')"
 if [[ "${REMOTE}" == "git@"* ]] ; then
   REMOTE="https://$(echo "${REMOTE}" | sed 's|\.git$||' | sed 's|:|/|' | sed 's|^git@||')"
+else
+  REMOTE="$(echo "${REMOTE}" | sed 's|\.git$||')"
 fi
-
 
 
 
