@@ -8,8 +8,10 @@ CODE_URL=$(curl -ksL -w "%{http_code} %{url_effective}\\n" "$url" -o /dev/null ;
 total=$[${total}+1]
 if [ $(echo ${CODE_URL} | awk {'print $1'}) = "200" ] ; then
     echo -n '.'
+    exit 0
 else
     n_bad=$[${n_bad}+1]
     echo "Non-200: ${n_bad} / ${total}"
     echo $CODE_URL
+    exit 1
 fi
