@@ -5,10 +5,12 @@
 
 set -eu
 
-if [ z${1-} = "z" ] ; then
-  COMPARE_BRANCH="master"
-else
+if ! [ z${1-} = "z" ] ; then
   COMPARE_BRANCH="$1"
+elif type pr_target_branch &> /dev/null ; then
+  COMPARE_BRANCH="$(pr_target_branch)"
+else
+  COMPARE_BRANCH="master"
 fi
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
@@ -26,7 +28,7 @@ fi
 
 
 if [[ "${REMOTE}" == *github.com* ]] ; then
-  URL="${REMOTE}/compare/${BRANCH}?expand=1"
+  URL="${REMOTE}/compare/${COMPARE_BRANCH}...${BRANCH}?expand=1"
   echo "${URL}"
 
   generic_open "${URL}"
