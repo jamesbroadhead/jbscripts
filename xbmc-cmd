@@ -28,5 +28,5 @@ else
 fi
 
 echo "${DT}: calling xbmc-send with ${COMMAND}" >> "${LOGFILE}"
-$XBMC_SEND -a "${COMMAND}" &>> "${LOGFILE}"
+$XBMC_SEND --action="${COMMAND}" &>> "${LOGFILE}"
 exit $?
