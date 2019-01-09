@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# Squash Merge the current branch & push it to the remote.
+#
+# This is intended to replace a branch which has a mix of signed and unsigned
+# commits with a single signed commit for use in PRs
+
+set -xeou pipefail
+
+read -n 1 -s -r -p "This will wipe your local and remote branches. You'll lose commit messages along the way. A backup of your diff will be created in case something goes wrong. Hit Enter to continue"
+
+
+git fetch
+echo "Creating a backup of your branch in ~/.patch_bak"
+git diff origin/master..HEAD > ~/.patch_bak
+
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+if [ "$BRANCH" = "master" ] ; then
+  echo "Check out your work branch first!"
+  exit 1
+elif [ "$BRANCH" = "HEAD" ] ; then
+  echo "Check out your work branch first!"
+  exit 1
+fi
+
+git reset --hard origin/master
+git merge --squash "origin/$BRANCH"
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+git add .
+
+git commit -m "${BRANCH}_squashed"
+
+git push --force origin HEAD:$BRANCH
+
+
