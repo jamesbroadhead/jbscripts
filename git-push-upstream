@@ -5,7 +5,7 @@
 
 set -eu
 
-if ! [ z${1-} = "z" ] ; then
+if ! [ "z${1-}" = "z" ] ; then
   COMPARE_BRANCH="$1"
 elif type pr_target_branch &> /dev/null ; then
   COMPARE_BRANCH="$(pr_target_branch)"
@@ -16,20 +16,6 @@ fi
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 git push --set-upstream origin "${BRANCH}"
 
-# get the remote as a url (even if it's git@foo.com/bar.git)
-REMOTE="$(git remote -v  | grep origin | grep push | awk '{print $2}')"
-if [[ "${REMOTE}" == "git@"* ]] ; then
-  REMOTE="https://$(echo "${REMOTE}" | sed 's|\.git$||' | sed 's|:|/|' | sed 's|^git@||')"
-else
-  REMOTE="$(echo "${REMOTE}" | sed 's|\.git$||')"
-fi
+open_pr "${COMPARE_BRANCH}" "${BRANCH}"
 
 
-
-
-if [[ "${REMOTE}" == *github.com* ]] ; then
-  URL="${REMOTE}/compare/${COMPARE_BRANCH}...${BRANCH}?expand=1"
-  echo "${URL}"
-
-  generic_open "${URL}"
-fi
