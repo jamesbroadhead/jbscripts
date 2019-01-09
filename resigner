@@ -35,4 +35,5 @@ git commit -m "${BRANCH}_squashed"
 
 git push --force origin HEAD:$BRANCH
 
+open_pr master "$BRANCH"
 
