@@ -1,5 +1,8 @@
 #!/bin/bash
 
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+
 files=("$(git status --porcelain | grep '^??' | sed 's|^??||g')")
 
 rm -rIf $files
