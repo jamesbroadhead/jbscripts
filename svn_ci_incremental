@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#
+# Commit each file in an svn repo one-at-a-time.
+# This hellish script exists to support network hardware which crashes on
+# large commits
+
+find . -type d -exec svn add -N \;
+for i in $(svn st | awk {'print $2'}) ; do
+    svn add $i
+    svn ci -m "added by svn_ci_incremental"
+done
+

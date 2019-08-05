@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+# lol  svn status | grep ? | awk {'print $2'} | xargs svn add
+
+
+import os
+import subprocess
+import sys
+
+def add_new_files_below(path):
+
+    stdout_b, stderr_b = subprocess.Popen(['svn', 'status', path], \
+        stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()
+
+    stdout = stdout_b.decode('utf-8')
+
+    files = [ line.split('?')[1][7:] for line in stdout.split('\n')
+            if '?' in line ]
+
+    return files
+
+
+if len(sys.argv) > 1:
+    files_lol = [ add_new_files_below(i) for i in sys.argv[1:] \
+                    if os.path.exists(i) ]
+else:
+    files_lol = [ add_new_files_below('./') ]
+
+
+if not any(files_lol):
+    sys.exit(0)
+
+for lofiles in files_lol:
+    stdout_b, stderr_b= subprocess.Popen(['svn', 'add'] + lofiles, stderr=subprocess.STDOUT, stdout=subprocess.PIPE ).communicate()
+
+    stdout = stdout_b.decode('utf-8')
+    if not stdout == None:
+        for item in stdout.split('\n'):
+            print(item)
