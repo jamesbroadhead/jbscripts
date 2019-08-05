@@ -4,7 +4,11 @@
 # This hellish script exists to support network hardware which crashes on
 # large commits
 
-find . -type d -exec svn add -N \;
+# TODO won't work with spaces
+for i in $(svn st | awk {'print $2'}) ; do
+  find $i -type d -exec svn add -N \;
+done
+
 for i in $(svn st | awk {'print $2'}) ; do
     svn add $i
     svn ci -m "added by svn_ci_incremental"
