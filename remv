@@ -1,8 +1,38 @@
 #!/usr/bin/env python
 
 import os
-from os import abspath, realpath
+from os.path import abspath, basename, isdir, realpath
+from os.path import exists as pexists
+from os.path import join as pjoin
+import shutil
+import sys
 
-for f in sys.argv[1:]:
-  path = realpath(f)
-  print(path)
+def remv(src, dst):
+    src = realpath(src)
+    if not pexists(src):
+        print('{} does not exist, skipping'.format(src))
+        return
+    last_element = basename(src)
+    if isdir(dst):
+        dst = pjoin(dst, last_element)
+    else:
+        # this is easier than handling cases like directory-paths which do not exist
+        raise Exception('dst must be a directory which exists. Got: {}'.format(dst))
+
+    if pexists(dst):
+        raise Exception('{} already exists!'.format(dst))
+
+    print('shutil.mv({},{})'.format(src, dst))
+    shutil.move(src, dst)
+
+
+def main(sources, dst):
+    for source in sources:
+        remv(source, dst)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        raise Exception('Must pass src and dst')
+
+    main(sys.argv[1:-1], sys.argv[-1])
