@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+ORIG="$1"
+NEW="$1_shrunk.pdf"
+PS="${ORIG}.ps"
+
+pdf2ps "${ORIG}" "${PS}"
+ps2pdf "${PS}" "${NEW}"
