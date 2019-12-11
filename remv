@@ -8,23 +8,48 @@ import shutil
 import sys
 
 def remv(src, dst):
-    src = realpath(src)
-    if not pexists(src):
+    """
+    This works for a symlinked directory full of files.
+    It _does not_ work for a directory full of symlinks :-/
+    """
+    resolved_src = realpath(src)
+    if not pexists(resolved_src):
         print('{} does not exist, skipping'.format(src))
         return
-    last_element = basename(src)
+    last_element = basename(resolved_src)
     if isdir(dst):
         dst = pjoin(dst, last_element)
     else:
         # this is easier than handling cases like directory-paths which do not exist
         raise Exception('dst must be a directory which exists. Got: {}'.format(dst))
 
-    if pexists(dst):
-        raise Exception('{} already exists!'.format(dst))
+    contents = sorted(os.listdir(resolved_src))
+    for c in contents:
+        if isdir(c):
+            raise
 
-    print('shutil.mv({},{})'.format(src, dst))
-    shutil.move(src, dst)
+    if not isdir(dst):
+        os.mkdir(dst)
 
+    for c in contents:
+        resolved_c = realpath(pjoin(resolved_src,c))
+        basename_c = basename(resolved_c)
+        full_dst = pjoin(dst, basename_c)
+
+        if pexists(full_dst):
+            raise
+
+    for c in contents:
+        resolved_c = realpath(pjoin(resolved_src,c))
+        basename_c = basename(resolved_c)
+        full_dst = pjoin(dst, basename_c)
+
+        print('Printing, not moving...')
+        print('shutil.mv({},{})'.format(resolved_c, full_dst))
+
+        # resolve the symlink
+        # move the resolved target to the destination
+        #shutil.move(resolved_src, dst)
 
 def main(sources, dst):
     for source in sources:
