@@ -38,6 +38,8 @@ cd_directory_of_which() {
 }
 export cd_directory_of_which
 alias cddw="cd_directory_of_which"
+alias cdw="cd_directory_of_which"
+
 
 detect_ssh_keys() {
   ssh-agent -l &> /dev/null
