@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+import sys
+try: # py3
+    from http.server import HTTPServer, SimpleHTTPRequestHandler
+
+except ImportError as e:
+    from BaseHTTPServer import HTTPServer
+    from SimpleHTTPServer import SimpleHTTPRequestHandler
+
+port = 8000
+if len(sys.argv) > 1:
+    port = int(sys.argv[1])
+
+try: # use twisted if available
+    from twisted.web.server import Site
+    from twisted.web.static import File
+    from twisted.internet import reactor;
+    reactor.listenTCP(port, Site(File(".")))
+    reactor.run()
+    sys.exit(0)
+except ImportError as e:
+    print("Didn't find twisted - continuing with http.server")
+
+
+addr = ("0.0.0.0", port)
+
+print('Opening on port {}'.format(port))
+
+SimpleHTTPRequestHandler.extensions_map['.tgz'] = 'application/x-gzip'
+SimpleHTTPRequestHandler.do_POST = SimpleHTTPRequestHandler.do_GET
+
+serv = HTTPServer(addr, SimpleHTTPRequestHandler)
+serv.serve_forever()
