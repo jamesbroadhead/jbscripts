@@ -9,4 +9,4 @@
 
 branchname="$(git-branchname)";
 commit_msg="$(echo "$branchname" | sed 's|_|: |' | sed 's|_| |g')";
-git ci -m "${commit_msg}"
+git ci -m "${commit_msg}" $*
