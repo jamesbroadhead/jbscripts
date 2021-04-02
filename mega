@@ -25,7 +25,8 @@ translations = {
   },
   'svn': {
       'push': ['ci'],
-      'pull': ['up']},
+      'pull': ['up'],
+      'pul': ['up']},
   'hg' : { 'pull': ['pull', 'up'] },
 }
 
