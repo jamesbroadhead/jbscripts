@@ -1,0 +1,4 @@
+check process kodi with pidfile /var/run/kodi/kodi.pid
+  group root
+  start program = "/etc/init.d/kodi start"
+  stop  program = "/etc/init.d/kodi stop"

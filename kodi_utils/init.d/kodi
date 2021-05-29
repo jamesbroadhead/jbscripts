@@ -1,0 +1,64 @@
+#!/bin/bash
+# http://wiki.kodi.org/index.php?title=HOW-TO:Install_XBMC_for_Linux
+# 2013-12
+
+### BEGIN INIT INFO
+# Provides:          kodi
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts instance of XBMC
+# Description:       starts instance of XBMC using start-stop-daemon and xinit
+### END INIT INFO
+
+############### EDIT ME ##################
+
+COMMAND="/usr/local/bin/kodi-display"
+
+# this script
+NAME="kodi"
+
+# app name
+DESC="XBMC"
+
+# user
+RUN_AS="route"
+
+# Path of the PID file
+PID_DIR="/var/run/${NAME}"
+PID_FILE="${PID_DIR}/${NAME}.pid"
+
+############### END EDIT ME ##################
+
+test -x $COMMAND || ( echo "failed to find ${COMMAND}" ; exit 0 )
+
+set -e
+case "$1" in
+  start)
+        echo "Starting $DESC"
+        mkdir -p ${PID_DIR}
+        chown ${RUN_AS}:root ${PID_DIR}
+        start-stop-daemon --start -u $RUN_AS --background --pidfile $PID_FILE  --make-pidfile --exec "$COMMAND"
+        ;;
+  stop)
+        echo "Stopping $DESC"
+        PID=$(cat $PID_FILE)
+        /bin/kill -s 15 "${PID}"
+        rm -f ${PID_FILE}
+        ;;
+
+  restart)
+        echo "Restarting $DESC"
+        start-stop-daemon --stop --pidfile $PID_FILE
+        sleep 5
+        start-stop-daemon --start -u $RUN_AS --background --pidfile $PID_FILE  --make-pidfile --exec $COMMAND
+        ;;
+  *)
+        N=/etc/init.d/$NAME
+        echo "Usage: $N {start|stop|restart|force-reload}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

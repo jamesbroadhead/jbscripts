@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# specialised version of this to be run from the webserver
+
+USER="route"
+HOME="/home/$USER"
+export USER
+export HOME
+
+LOGFILE="$HOME/logs/kodi-restarted/kodi-restarted.log"
+LOGDIR="$(dirname "${LOGFILE}")"
+XBMCLOGDIR="$HOME/.kodi/temp"
+
+nicedatetime() {
+    date "+%FT%T"
+}
+
+mkdir -p "${LOGDIR}"
+echo "$(nicedatetime): kodi-restart called" >> $LOGFILE
+
+if ! [ "$(pgrep -c kodi.bin)" -eq 0 ] ; then
+	for SIG in INT TERM HUP KILL ; do
+		PID=$(pgrep kodi.bin)
+		if ! [ x"${PID}" = x ] ; then
+			echo "$(nicedatetime): kill -$SIG $PID" >> $LOGFILE
+			kill "-${SIG}" "${PID}"
+			sleep 5
+		fi
+	done
+
+	if ! [ "$(pgrep -c kodi.bin)" -eq 0 ] ; then
+		echo "$(nicedatetime): FAILED TO KILL XBMC" >> $LOGFILE
+		exit 1
+	else
+		echo "$(nicedatetime): Killed kodi" >> $LOGFILE
+	fi
+else
+	echo "$(nicedatetime): kodi wasn't running" >> $LOGFILE
+fi
+
+for i in kodi.log kodi.old.log ; do
+	kodi_log="${XBMCLOGDIR}/${i}"
+	if [ -f "$kodi_log" ] ; then
+		mv "$kodi_log" "$LOGDIR/$(nicedatetime)-${i}"
+    fi
+done
+
+DISPLAY=:0 kodi -fs & &> /dev/null
+
+sleep 5
+if ! [ "$(pgrep -c kodi.bin)" -eq 0 ] ; then
+    echo "$(nicedatetime) kodi running again :)" >> $LOGFILE
+    exit 0
+else
+    echo "$(nicedatetime) kodi not running after restart :(" >> $LOGFILE
+    exit 2
+fi

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+_term() {
+  echo "Caught SIGTERM signal!"
+  kill -TERM "$child" 2>/dev/null
+}
+
+trap _term SIGTERM
+
+XBMC="/usr/bin/kodi"
+DISPLAY=:0 $XBMC -fs &> /dev/null &
+
+child=$!
+wait "$child"

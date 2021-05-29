@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# bin
+cd bin
+for i in * ; do
+    sudo cp -v $i /usr/local/bin/$i
+    sudo chmod 755 /usr/local/bin/$i
+done
+cd ..
+
+# init.d
+cd init.d
+for i in * ; do
+    initpath=/etc/init.d/$i
+    sudo cp -v $i $initpath
+    sudo chown root:root $initpath
+    sudo chmod 755 $initpath
+done
+cd ..
+
+# monit
+sudo mkdir -p /etc/monit.d
+cd monit.d
+for i in * ; do
+    sudo cp -v $i /etc/monit.d
+    sudo chown root:root /etc/monit.d/$i
+done
+cd ..
