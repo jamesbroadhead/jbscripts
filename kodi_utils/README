@@ -1,1 +1,6 @@
 Init scripts and monit configs for managing kodi
+
+Has a hardcoded username, 'route' for kodi to run as.
+This should be the same username as the user running the X server.
+
+Install with ./deploy, and either use the init scripts, or install monit and have monit manage the processes
