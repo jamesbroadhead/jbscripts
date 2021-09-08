@@ -4,7 +4,7 @@
 # TODO : Combine into obconf (?)
 # TODO (Maybe) : Interactive 'which desktop' question
 # TODO (Less likely) : Interactive 'which options' questions
-from __future__ import print_function
+
 
 import os
 import subprocess
@@ -30,7 +30,7 @@ s = subprocess.Popen(['xprop'], \
 items = {'WM_CLASS':'"",""','WM_WINDOW_ROLE':'""','_NET_WM_WINDOW_TYPE':'""'}
 
 for line in s.splitlines():
-	for item in items.keys():
+	for item in list(items.keys()):
 		if item in line:
 			items[item] = line.split('=')[1].strip()
 
