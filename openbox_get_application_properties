@@ -1,54 +1,64 @@
-#!/usr/bin/python2
-
-# TODO : More testing.
-# TODO : Combine into obconf (?)
-# TODO (Maybe) : Interactive 'which desktop' question
-# TODO (Less likely) : Interactive 'which options' questions
-
-
+#!/usr/bin/python
+"""
+http://openbox.org/wiki/Help:Applications
+"""
 import os
 import subprocess
 import sys
 
-# cli uses inverse boolean to python
 def xprop_exists():
-	return not os.system('which xprop &> /dev/null')
+    """ cli uses inverse boolean to python """
+    return not os.system('which xprop &> /dev/null')
 
-if not xprop_exists():
-	print('Could not find xprop. Possible Causes:', file=sys.stderr)
-	print(' - xprop and/or which aren\'t installed', file=sys.stderr)
-	print(' - xprop and/or which aren\'t in your PATH', file=sys.stderr)
+def get_xprop_string():
+    if not xprop_exists():
+        print('Could not find xprop. Possible Causes:', file=sys.stderr)
+        print(' - xprop and/or which aren\'t installed', file=sys.stderr)
+        print(' - xprop and/or which aren\'t in your PATH', file=sys.stderr)
 
-	sys.exit(1)
+        sys.exit(1)
 
-print('Now click on the application you want to configure!')
-print()
+    print('Now click on the application you want to configure!')
+    print()
 
-s = subprocess.Popen(['xprop'], \
-	stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0]
+    s = subprocess.Popen(['xprop'], \
+        stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].decode('utf-8')
+    return s
 
-items = {'WM_CLASS':'"",""','WM_WINDOW_ROLE':'""','_NET_WM_WINDOW_TYPE':'""'}
+def create_openbox_xml(xprop_string):
+    items = {'WM_CLASS':'"",""','WM_WINDOW_ROLE':'""','_NET_WM_WINDOW_TYPE':'""'}
 
-for line in s.splitlines():
-	for item in list(items.keys()):
-		if item in line:
-			items[item] = line.split('=')[1].strip()
+    for line in xprop_string.splitlines():
+        for item in list(items.keys()):
+            if item in line:
+                items[item] = line.split('=')[1].strip()
 
-outitems = {	'name' 	: items['WM_CLASS'].split(',')[0].strip(),	\
-				'class' : items['WM_CLASS'].split(',')[1].strip(),	\
-				'role'	: items['WM_WINDOW_ROLE'], \
-				'type'	: items['_NET_WM_WINDOW_TYPE'] }
+    outitems = {	'name' 	: items['WM_CLASS'].split(',')[0].strip(),	\
+                    'class' : items['WM_CLASS'].split(',')[1].strip(),	\
+                    'role'	: items['WM_WINDOW_ROLE'], \
+                    'type'	: items['_NET_WM_WINDOW_TYPE'] }
 
-# Always include both WM_CLASS entries
-# Use the others if the previous are blank
-outstring = '<application name=' + outitems['name'] + ' class=' + outitems['class']
 
-if outitems['name'] == '""' and outitems['class'] == '""':
-	outstring += ' role=' + outitems['role']
-	if outitems['role'] == '""':
-		outstring += ' type=' + outitems['type']
+    # 2021-09: Previous logic was to:
+    # * always include both WM_CLASS entries
+    # * use WM_WINDOW_ROLE if both WM_CLASS entries are empty
+    # * use _NET_WM_WINDOW_TYPE if both WM_CLASS entries and WM_WINDOW_ROLE are blank
+    #
+    # Can't remember why this is this way - updating to use all fields
 
-endstring = '> \n\t<desktop>1</desktop> \n\t<layer>normal</layer> \n\t<focus>no</focus> \n</application>'
+    outstring = '<application name={name} class={class} role={role} type={type}>\n\t<desktop>1</desktop> \n\t<layer>normal</layer> \n\t<focus>no</focus> \n</application>'.format(**outitems)
 
-print(outstring + endstring)
+    print(outstring)
 
+def main():
+    if len(sys.argv) > 1:
+        xprop_file = sys.argv[1]
+        with open(xprop_file) as fh:
+            xprop_string = fh.read()
+    else:
+        xprop_string = get_xprop_string()
+
+    create_openbox_xml(xprop_string)
+
+if __name__ == '__main__':
+    main()
