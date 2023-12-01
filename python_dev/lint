@@ -3,6 +3,11 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "${DIR}/.."
 
+# TODO: detect python shebang rather than rely on this list
+PYTHON=(download_oss_licenses.py git-apply-pr git_hooks/meld-git.py mega openbox_get_application_properties remv simple_external_http_server svn_add_new un1252.py)
+
 # Include python files without .py extension.
 # Relies on black to ignore files it can't parse, or human review to avoid checking in mank
-black *
+black "${PYTHON[@]}"
+
+pylint -E "${PYTHON[@]}"

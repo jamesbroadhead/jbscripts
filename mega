@@ -59,7 +59,7 @@ def ssh_add_keys():
     if res.returncode == 0:  # 0 means there are keys loaded
         return
     if res.returncode == 2:  # 2 means no agent
-        raise subprocess.CalledProcessError("ssh-add reported no ssh-agent running")
+        raise RuntimeError("ssh-add reported no ssh-agent running")
     # 1 means no keys
 
     # TODO run `sadd`
