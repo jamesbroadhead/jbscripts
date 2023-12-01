@@ -47,6 +47,26 @@ def get_paths(vcs):
     potential_paths = potential_paths + [ j for j in joined if isdir(j) ]
   return sorted(set(realpath(p) for p in potential_paths))
 
+def ssh_add_keys():
+  """
+  Run sadd if there are no keys in the ssh-agent
+
+  Limitations:
+    ssh-agent not running
+    Unnecessary if all repos are local
+  """
+  res = subprocess.run(['ssh-add', '-l'], capture_output=True)
+
+  if res.returncode == 0: # 0 means there are keys loaded
+    return
+  if res.returncode == 2: # 2 means no agent
+    raise subprocess.CalledProcessError('ssh-add reported no ssh-agent running')
+  # 1 means no keys
+
+  # TODO run `sadd`
+
+  pass
+
 def translate(vcs, operation):
   """
   translate a CLI operation into args for the VCS.
@@ -65,6 +85,8 @@ def vcs_command(vcs, path, operation):
 
 def main():
   operations = sys.argv[1:]
+
+  ssh_add_keys()
 
   paths = { vcs: get_paths(vcs) for vcs in vcss }
 
