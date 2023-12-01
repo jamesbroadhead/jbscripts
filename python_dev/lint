@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "${DIR}/.."
+
+# Include python files without .py extension.
+# Relies on black to ignore files it can't parse, or human review to avoid checking in mank
+black *

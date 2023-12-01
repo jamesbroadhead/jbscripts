@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+mkdir -p ~/venv
+python -m venv ~/venv/default
+. ~/venv/default/bin/activate
+
+pip install -r requirements.txt

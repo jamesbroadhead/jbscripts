@@ -7,27 +7,30 @@ import subprocess
 
 github_username = sys.argv[1]
 
+
 def run(cmd):
-  basestr = subprocess.check_output(shlex.split(cmd))
-  return basestr.decode('utf-8').strip('\n')
+    basestr = subprocess.check_output(shlex.split(cmd))
+    return basestr.decode("utf-8").strip("\n")
+
 
 def run_and_continue(cmd):
     try:
         run(cmd)
     except subprocess.CalledProcessError as e:
         print(e)
-        print('continuing...')
+        print("continuing...")
 
 
-repo_name = basename(run('git rev-parse --show-toplevel'))
+repo_name = basename(run("git rev-parse --show-toplevel"))
 
-repo_url = 'https://github.com/{username}/{repo_name}'.format(username=github_username, repo_name=repo_name)
+repo_url = "https://github.com/{username}/{repo_name}".format(
+    username=github_username, repo_name=repo_name
+)
 
-run_and_continue('git remote rm {}'.format(github_username))
+run_and_continue("git remote rm {}".format(github_username))
 
-run('git remote add {} {}'.format(github_username, repo_url))
+run("git remote add {} {}".format(github_username, repo_url))
 
-run('git fetch {}'.format(github_username))
+run("git fetch {}".format(github_username))
 
-run('git checkout -b {} {}/master'.format(github_username, github_username))
-
+run("git checkout -b {} {}/master".format(github_username, github_username))

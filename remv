@@ -7,6 +7,7 @@ from os.path import join as pjoin
 import shutil
 import sys
 
+
 def remv(src, dst):
     """
     This works for a symlinked directory full of files.
@@ -14,14 +15,14 @@ def remv(src, dst):
     """
     resolved_src = realpath(src)
     if not pexists(resolved_src):
-        print('{} does not exist, skipping'.format(src))
+        print("{} does not exist, skipping".format(src))
         return
     last_element = basename(resolved_src)
     if isdir(dst):
         dst = pjoin(dst, last_element)
     else:
         # this is easier than handling cases like directory-paths which do not exist
-        raise Exception('dst must be a directory which exists. Got: {}'.format(dst))
+        raise Exception("dst must be a directory which exists. Got: {}".format(dst))
 
     contents = sorted(os.listdir(resolved_src))
     for c in contents:
@@ -32,7 +33,7 @@ def remv(src, dst):
         os.mkdir(dst)
 
     for c in contents:
-        resolved_c = realpath(pjoin(resolved_src,c))
+        resolved_c = realpath(pjoin(resolved_src, c))
         basename_c = basename(resolved_c)
         full_dst = pjoin(dst, basename_c)
 
@@ -40,24 +41,25 @@ def remv(src, dst):
             raise
 
     for c in contents:
-        resolved_c = realpath(pjoin(resolved_src,c))
+        resolved_c = realpath(pjoin(resolved_src, c))
         basename_c = basename(resolved_c)
         full_dst = pjoin(dst, basename_c)
 
-        print('Printing, not moving...')
-        print('shutil.mv({},{})'.format(resolved_c, full_dst))
+        print("Printing, not moving...")
+        print("shutil.mv({},{})".format(resolved_c, full_dst))
 
         # resolve the symlink
         # move the resolved target to the destination
-        #shutil.move(resolved_src, dst)
+        # shutil.move(resolved_src, dst)
+
 
 def main(sources, dst):
     for source in sources:
         remv(source, dst)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) < 3:
-        raise Exception('Must pass src and dst')
+        raise Exception("Must pass src and dst")
 
     main(sys.argv[1:-1], sys.argv[-1])

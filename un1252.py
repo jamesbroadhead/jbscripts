@@ -8,5 +8,5 @@ find . -iname "*py|*js" -exec grep --color='auto' -P -n "[\x80-\xFF]" {} \;
 
 a = "this.label = '\x97' + this.name;"
 
-b = a.decode('cp1252')
-c = a.encode('utf-8')
+b = a.decode("cp1252")
+c = a.encode("utf-8")
