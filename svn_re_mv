@@ -3,14 +3,13 @@
 # Repeat a `mv A B`, replacing it with `svn mv A B`
 #
 
-if [ -f "$1" ] ; then
+if [ -e "$1" ] ; then
   echo "First arg must not exist"
   exit 1
-elif ! [ -f "$2" ] ; then
+elif ! [ -e "$2" ] ; then
   echo "Second arg must exist"
   exit 1
 fi
 
 mv "$2" "$1"
 svn mv "$1" "$2"
-
