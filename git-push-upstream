@@ -10,7 +10,7 @@ if ! [ "z${1-}" = "z" ] ; then
 elif type pr_target_branch &> /dev/null ; then
   COMPARE_BRANCH="$(pr_target_branch)"
 else
-  COMPARE_BRANCH="master"
+  COMPARE_BRANCH="main"
 fi
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
