@@ -14,6 +14,8 @@ port = 8000
 if len(sys.argv) > 1:
     port = int(sys.argv[1])
 
+print("Opening on port {}".format(port))
+
 try:  # use twisted if available
     from twisted.web.server import Site
     from twisted.web.static import File
@@ -25,13 +27,21 @@ try:  # use twisted if available
 except ImportError as e:
     print("Didn't find twisted - continuing with http.server")
 
-
 addr = ("0.0.0.0", port)
 
-print("Opening on port {}".format(port))
+class LogUserAgentHandler(SimpleHTTPRequestHandler):
+  def log_message(self, format, *args):
+        ua = self.headers.get('User-Agent', 'Unknown')
+        message = format % args
+        sys.stderr.write("%s - - [%s] %s User-Agent: %s\n" % (
+            self.address_string(),
+            self.log_date_time_string(),
+            message,
+            ua
+        ))
 
 SimpleHTTPRequestHandler.extensions_map[".tgz"] = "application/x-gzip"
 SimpleHTTPRequestHandler.do_POST = SimpleHTTPRequestHandler.do_GET
 
-serv = HTTPServer(addr, SimpleHTTPRequestHandler)
+serv = HTTPServer(addr, LogUserAgentHandler)
 serv.serve_forever()
