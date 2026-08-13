@@ -60,11 +60,17 @@ def ssh_add_keys():
         return
     if res.returncode == 2:  # 2 means no agent
         raise RuntimeError("ssh-add reported no ssh-agent running")
-    # 1 means no keys
-
-    # TODO run `sadd`
-
-    pass
+    # 1 means no keys — replicate sadd's key search
+    key_candidates = [
+        expanduser("~/doc/tech/keys/ssh/main/id_ed25519"),
+        expanduser("~/doc/tech/keys/ssh/main/id_rsa"),
+        expanduser("~/.ssh/id_ed25519"),
+        expanduser("~/.ssh/id_rsa"),
+    ]
+    for k in key_candidates:
+        if os.path.exists(k):
+            subprocess.run(["ssh-add", k])
+            return
 
 
 def translate(vcs, operation):
