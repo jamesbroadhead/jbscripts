@@ -9,6 +9,16 @@ home_form() {
 	echo ${home_form}
 }
 
+# Is $1 a path inside the same home repo we are deploying from?
+# Used to tell "another overlay dir already claimed this" apart from "the user
+# has real content here".
+is_repo_path() {
+	case "$1" in
+		"${REPO_ROOT}"/*) return 0 ;;
+		*) return 1 ;;
+	esac
+}
+
 make_symlink() {
 	# $1 : full path to a file which should be symlinked into ~
     dot_path="${1}"
@@ -16,18 +26,27 @@ make_symlink() {
 	newpath=$(home_form $dot_path)
 
 	if [ -L "${newpath}" ] ; then
-		# broken symlink in place
-		if ! [ -f "${newpath}" ] && [ -L "${newpath}" ] ; then
+		# broken symlink in place ([ -e ] follows the link)
+		if ! [ -e "${newpath}" ] ; then
 			#echo "would remove $newpath"
 			rm "$newpath"
-		# not a symlink pointing to the correct location
-		elif ! [ "$(readlink ${newpath})" = "${dot_path}" ] ; then
-			#echo "would replace $newpath"
-			backup_old_content $newpath
 		# there is a symlink pointing to the correct location already
-		else
+		elif [ "$(readlink ${newpath})" = "${dot_path}" ] ; then
 			#echo "looks ok $newpath"
 			return 0
+		# A working symlink into this repo, but from a different overlay dir --
+		# e.g. home/dot_gitconfig where we are now deploying home_mongodb. There
+		# is nothing to preserve: the target is a tracked file that is still
+		# there. Backing it up just filled ~/bak with dead symlinks every run,
+		# and deploy runs `home` before the machine-specific dirs, so the last
+		# writer is the specific one that is meant to win.
+		elif is_repo_path "$(readlink -f "${newpath}")" ; then
+			#echo "would take over $newpath from another overlay"
+			rm "${newpath}"
+		# a symlink to something outside the repo -- that is the user's, keep it
+		else
+			#echo "would replace $newpath"
+			backup_old_content $newpath
 		fi
 
 	elif [ -e "${newpath}" ] ; then
@@ -61,6 +80,11 @@ if ! [ -f $confirmfile ] ; then
 	echo "Didn't find $confirmfile -- exiting"
 	exit 1
 fi
+
+# The repo holding every overlay dir, fully resolved so it can be compared
+# against `readlink -f` output. $DEPLOY_FROM_DIR is <repo>/home, <repo>/home_taktile, ...
+REPO_ROOT="$(cd "${DEPLOY_FROM_DIR}" && pwd -P)"
+REPO_ROOT="$(dirname "${REPO_ROOT}")"
 
 # cleanup from older versions
 for e in $DEPLOY_FROM_DIR/* ; do
