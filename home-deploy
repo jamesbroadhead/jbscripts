@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-DEPLOY_FROM_DIR="$1"
 bak="${HOME}/bak/$(date +%F)"
 
 home_form() {
@@ -75,25 +74,55 @@ backup_old_content() {
 	mv -i "$path" "${bakpath}"
 }
 
-confirmfile="$DEPLOY_FROM_DIR/.is_home_deploy_dir"
-if ! [ -f $confirmfile ] ; then
-	echo "Didn't find $confirmfile -- exiting"
+if [ "$#" -lt 1 ] ; then
+	echo "usage: $(basename "$0") DIR [DIR...]"
+	echo "  Each DIR is an overlay dir in the home repo. Later dirs win, so"
+	echo "  pass the generic dir first: home-deploy home home_taktile"
 	exit 1
 fi
 
-# The repo holding every overlay dir, fully resolved so it can be compared
-# against `readlink -f` output. $DEPLOY_FROM_DIR is <repo>/home, <repo>/home_taktile, ...
-REPO_ROOT="$(cd "${DEPLOY_FROM_DIR}" && pwd -P)"
-REPO_ROOT="$(dirname "${REPO_ROOT}")"
-
-# cleanup from older versions
-for e in $DEPLOY_FROM_DIR/* ; do
-	base=$(basename $e)
-	if [ -d $e ] && [ -L $HOME/$base ] ; then
-		echo "Symlinks to deployable dirs exist in your homedir. Bailing"
+for deploy_from_dir in "$@" ; do
+	confirmfile="$deploy_from_dir/.is_home_deploy_dir"
+	if ! [ -f "$confirmfile" ] ; then
+		echo "Didn't find $confirmfile -- exiting"
+		exit 1
 	fi
 done
 
-for abspath in $(find "$1" -wholename "*dot_*" -type f -exec readlink -f {} \;) ; do
-	make_symlink "${abspath}"
+# The repo holding every overlay dir, fully resolved so it can be compared
+# against `readlink -f` output. Dirs are <repo>/home, <repo>/home_taktile, ...
+REPO_ROOT="$(cd "$1" && pwd -P)"
+REPO_ROOT="$(dirname "${REPO_ROOT}")"
+
+# cleanup from older versions
+for deploy_from_dir in "$@" ; do
+	for e in "$deploy_from_dir"/* ; do
+		base=$(basename $e)
+		if [ -d "$e" ] && [ -L "$HOME/$base" ] ; then
+			echo "Symlinks to deployable dirs exist in your homedir. Bailing"
+		fi
+	done
 done
+
+# Resolve the overlays BEFORE touching anything in ~.
+#
+# Deploying one dir at a time is not idempotent: `home` and `home_mongodb` both
+# claim ~/.gitconfig, so each pass stole the path back from the previous one.
+# Every run rewrote the symlink twice and left a window where ~/.gitconfig
+# pointed at the generic file. Collect target<TAB>source across all dirs in
+# order, keep the LAST source for each target, then link each target once. A
+# second run then finds every symlink already correct and does nothing at all.
+pairs="$(mktemp "${TMPDIR:-/tmp}/home-deploy.XXXXXX")"
+trap 'rm -f "${pairs}"' EXIT
+
+for deploy_from_dir in "$@" ; do
+	find "$deploy_from_dir" -wholename "*dot_*" -type f -exec readlink -f {} \; |
+		while IFS= read -r abspath ; do
+			printf '%s\t%s\n' "$(home_form "${abspath}")" "${abspath}"
+		done
+done > "${pairs}"
+
+awk -F'\t' '{ last[$1] = $2 } END { for (t in last) print last[t] }' "${pairs}" |
+	while IFS= read -r abspath ; do
+		make_symlink "${abspath}"
+	done
